@@ -5,9 +5,9 @@
     android:initialLayout="@layout/month_view"
     android:minWidth="40dp"
     android:minHeight="40dp"
-    android:previewImage="@drawable/example_appwidget_preview"
+    android:previewImage="@drawable/preview_calendar"
 
-    android:previewLayout="@layout/month_view"
+
     android:targetCellWidth="3"
     android:targetCellHeight="2"
     android:updatePeriodMillis="86400000"

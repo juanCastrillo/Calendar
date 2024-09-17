@@ -1,26 +1,24 @@
 package juan.calendar
 
-import android.appwidget.AppWidgetManager
-import android.appwidget.AppWidgetProvider
 import android.content.Context
-import android.graphics.Typeface
 import android.util.Log
-import android.widget.RemoteViews
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
-import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.intl.Locale
+import androidx.compose.ui.text.toUpperCase
+import androidx.compose.ui.unit.Dp
+import androidx.glance.preview.ExperimentalGlancePreviewApi
+import androidx.glance.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.glance.ColorFilter
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
+import androidx.glance.GlanceTheme
+import androidx.glance.GlanceTheme.colors
 import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
-import androidx.glance.appwidget.background
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
 import androidx.glance.layout.Alignment
@@ -28,15 +26,15 @@ import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
 import androidx.glance.layout.fillMaxSize
+import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.layout.width
-import androidx.glance.text.FontFamily
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
-import java.time.DayOfWeek
+import androidx.glance.unit.Dimension
 import java.time.LocalDate
 
 // TODO - Use dynamic theme color
@@ -50,43 +48,81 @@ class MonthViewWidgetReceiver : GlanceAppWidgetReceiver() {
 /**
  * Implementation of App Widget functionality.
  */
+
 class MonthViewWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val today = LocalDate.now()
 
-        val firstWeekday = today.withDayOfMonth(1).dayOfWeek.value // Monday is 1, Sunday is 7.
-        val numberOfDays = today.lengthOfMonth()
-        val numberOfDaysPrev = today.minusMonths(1).lengthOfMonth()
-        val currentDay = today.dayOfMonth
+        // Which weekday is the 1st of the current month (What weekday the current month starts at)
         // DayOfWeek.MONDAY
+        val firstWeekday = today.withDayOfMonth(1).dayOfWeek.value // Monday:1, Sunday:7
+        val numberOfDays = today.lengthOfMonth() // Number of days of the current month
+        val currentDay = today.dayOfMonth
+        // val numberOfDaysPrev = today.minusMonths(1).lengthOfMonth()
+        val currentMonth = today.month.getDisplayName(java.time.format.TextStyle.FULL, Locale.current.platformLocale)
+
         // Display the current date.
         Log.d("DATESSSSS", "Current date: $today, firstWeekDay: $firstWeekday")
+
+        val calendarMatrix = constructCalendarMatrix(firstWeekday, numberOfDays)
         provideContent {
-            calendarView(firstWeekday, currentDay, numberOfDays, numberOfDaysPrev)
+            CalendarView(currentDay, currentMonth, calendarMatrix)
+        }
+    }
+
+    private fun constructCalendarMatrix(firstWeekday:Int, numberOfDays:Int): Array<IntArray> {
+        val nWeeks = 6; val nDaysWeek = 7
+        val calendarMatrix = Array(nWeeks) { IntArray(nDaysWeek) }
+        var tempDay = 1
+        for(nWeek in 0 until nWeeks) {
+            for(nDay in 0 until nDaysWeek) {
+                if ((nWeek == 0 && nDay < firstWeekday-1) || tempDay > numberOfDays) { continue }
+                else {
+                    calendarMatrix[nWeek][nDay] = tempDay
+                    tempDay += 1
+                }
+            }
+        }
+        return calendarMatrix
+    }
+
+    @Composable
+    fun CalendarView(currentDay: Int, currentMonth: String, calendarMatrix:Array<IntArray>) {
+        GlanceTheme(
+        ) {
+
+            Column(
+                modifier = GlanceModifier.fillMaxSize().background(colors.background).padding(
+                    Dp(8f)
+                ),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Row(
+                    modifier = GlanceModifier.fillMaxWidth()
+//                        .padding(horizontal = Dp(16f)),
+//                    horizontalAlignment = Alignment.Start
+                ) {
+                    Box(modifier = GlanceModifier.width(16.dp)){}
+                    MonthText(currentMonth.toUpperCase(Locale.current))
+                }
+                WeekDaysRow() // L M X ...
+                for (week in calendarMatrix) {
+                    WeekNumbersRow(week, currentDay)
+                }
+            }
         }
     }
 
     @Composable
-    fun calendarView(firstWeekDay: Int, currentDay: Int, nDays: Int, prevnDays: Int) {
-        Column(
-            modifier = GlanceModifier.fillMaxSize().background(Color.Black),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            weekRow() // L M X ...
-            daysRow(1, firstWeekDay-1, currentDay, nDays)
-            // X X X X X X 1
-            /*
-            1, 7-1, Y
-            2 = 7 - 6 + 1
-             */
-            val firstDay = 7 - firstWeekDay + 2
-            daysRow(firstDay, 0, currentDay, nDays)
-            daysRow(firstDay+7*1, 0, currentDay, nDays)
-            daysRow(firstDay+7*2, 0, currentDay, nDays)
-            daysRow(firstDay+7*3, 0, currentDay, nDays)
-            daysRow(firstDay+7*4, 0, currentDay, nDays)
-        }
+    fun MonthText(monthName: String) {
+        Text(monthName.toUpperCase(Locale.current),
+
+            style = TextStyle(
+                fontWeight = FontWeight.Bold,
+                color = colors.primary,
+            )
+        )
     }
 
     /**
@@ -95,31 +131,21 @@ class MonthViewWidget : GlanceAppWidget() {
      * selectedDay: Number of the day to select
      */
     @Composable
-    fun daysRow(numberStart: Int, dayStart: Int, selectedDay: Int, maxDay:Int) {
+    fun WeekNumbersRow(weekNumbers:IntArray, selectedDay: Int) {
         Row {
-//            for (nday in 0 until dayStart) {
-//                DayChar(day = " ")
-//            }
-//            for (nday in dayStart until (7-dayStart)) {
-//                val n = numberStart + nday
-//                DayChar(day = n.toString(), n == selectedDay)
-//            }
-            var currentDayNumber = numberStart
-            for (nday in 0 until 7) {
-                if (nday < dayStart || currentDayNumber > maxDay)
-                    DayChar(day = " ")
-                else {
-                    DayChar(day = currentDayNumber.toString(), currentDayNumber == selectedDay)
-                    currentDayNumber += 1
-                }
+            for (nDay in weekNumbers) {
+                DayChar(
+                    day = if (nDay == 0) " " else nDay.toString(),
+                    selected = nDay == selectedDay
+                )
             }
         }
     }
 
     // Muestra la fila con la cabecera de los dias,
-// TODO - de momento está solo en español
+    // TODO - de momento está solo en español
     @Composable
-    fun weekRow() {
+    fun WeekDaysRow() {
         Row {
 
             DayChar(day = "L", bold = true)
@@ -134,7 +160,7 @@ class MonthViewWidget : GlanceAppWidget() {
     }
 
     @Composable
-    fun DayChar(day: String, selected: Boolean = false, bold: Boolean = false,) {
+    fun DayChar(day: String, selected: Boolean = false, bold: Boolean = false) {
 
         Box(modifier = GlanceModifier.width(25.dp).height(25.dp),
             contentAlignment = Alignment(
@@ -143,16 +169,31 @@ class MonthViewWidget : GlanceAppWidget() {
             )
         ) {
             if (selected)
-                Image(provider = ImageProvider(R.drawable.selected), contentDescription = "selected")
-            Text(day, modifier = GlanceModifier.padding(2.dp),
+                Image(
+                    provider = ImageProvider(R.drawable.selected),
+                    colorFilter = ColorFilter.tint(colors.primary),
+                    contentDescription = ""
+                )
+            Text(
+                day, modifier = GlanceModifier.padding(2.dp),
                 style = TextStyle(
-                    fontWeight = if (bold) {FontWeight.Bold} else {FontWeight.Normal},
-                    color = ColorProvider(Color.White)
+                    fontWeight = if (bold) {
+                        FontWeight.Bold
+                    } else {
+                        FontWeight.Normal
+                    },
+                    color = colors.onSurface
                 ),
 
-            )
+                )
         }
+    }
 
+    @OptIn(ExperimentalGlancePreviewApi::class)
+    @Preview
+    @Composable
+    fun CalendarPreviewExample() {
+        CalendarView(1, "MARZO", constructCalendarMatrix(1, 31))
     }
 
 }
