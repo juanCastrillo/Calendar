@@ -13,8 +13,9 @@
         android:theme="@style/Theme.Calendar"
         tools:targetApi="35">
 
+        <!-- MONTH WIDGET -->
         <receiver
-            android:name=".MonthViewWidgetReceiver"
+            android:name=".widgets.MonthWidgetReceiver"
             android:exported="true" >
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -22,9 +23,24 @@
 
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/month_view_info" />
+                android:resource="@xml/month_widget_info" />
         </receiver>
 
+        <!-- MONTH+EVENTS WIDGET -->
+        <receiver
+            android:name=".widgets.MonthAndEventsWidgetReceiver"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/month_events_widget_info" />
+        </receiver>
+
+
+        <!-- DAY CHANGED RECEIVER -->
         <receiver
             android:name=".DayChangedBroadcastReceiver"
             android:exported="false">
@@ -36,7 +52,6 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.Calendar" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
