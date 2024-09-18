@@ -33,14 +33,8 @@ import juan.calendar.R
 // TODO - Use dynamic theme color
 // TODO - Set sizes dynamically depending on widget size
 class MonthWidgetReceiver : GlanceAppWidgetReceiver() {
-
-    // Let MyAppWidgetReceiver know which GlanceAppWidget to use
     override val glanceAppWidget: GlanceAppWidget = MonthWidget()
 }
-
-/**
- * Implementation of App Widget functionality.
- */
 
 class MonthWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {

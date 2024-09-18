@@ -1,12 +1,8 @@
 package juan.calendar.widgets
 
 import android.content.Context
-import android.util.Log
-import androidx.compose.animation.core.copy
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.intl.Locale
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.appwidget.GlanceAppWidget
@@ -20,12 +16,13 @@ import androidx.glance.layout.Row
 import java.time.LocalDate
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceTheme
 import androidx.glance.GlanceTheme.colors
 import androidx.glance.layout.Alignment
-import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxWidth
+import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.layout.width
 import androidx.glance.preview.ExperimentalGlancePreviewApi
@@ -34,10 +31,9 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import java.time.LocalTime
+import androidx.compose.ui.text.intl.Locale
 
 class MonthAndEventsWidgetReceiver : GlanceAppWidgetReceiver() {
-
-    // Let MyAppWidgetReceiver know which GlanceAppWidget to use
     override val glanceAppWidget: GlanceAppWidget = MonthAndEventsWidget()
 }
 
@@ -45,26 +41,28 @@ class MonthAndEventsWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
 
         val (currentDay, currentMonthName, calendarMatrix) = getCurrentMonthValues()
+        val weekDayName = LocalDate.now().dayOfWeek.getDisplayName(java.time.format.TextStyle.FULL, Locale.current.platformLocale)
         provideContent {
-            MonthAndEventsView(currentDay, currentMonthName, calendarMatrix)
+            MonthAndEventsView(currentDay, currentMonthName, calendarMatrix, listOf(), weekDayName)
         }
     }
 }
 
 @Composable
-fun MonthAndEventsView(currentDay: Int, currentMonth: String, calendarMatrix:Array<IntArray>) {
+fun MonthAndEventsView(selectedDay: Int, monthName: String, calendarMatrix:Array<IntArray>, events: List<CalendarEvent>, selectedWeekDayName: String) {
     GlanceTheme {
         Row(
             modifier = GlanceModifier.background(colors.background)
                 .fillMaxWidth()
         ) {
             MonthView(
-                currentDay, currentMonth, calendarMatrix,
+                selectedDay, monthName, calendarMatrix,
                 modifier = GlanceModifier
                 .defaultWeight()
             )
             EventsView(
-                examplesCalendarEvents,
+                events,
+                selectedDay, selectedWeekDayName,
                 modifier = GlanceModifier
                 .defaultWeight()
             )
@@ -73,16 +71,58 @@ fun MonthAndEventsView(currentDay: Int, currentMonth: String, calendarMatrix:Arr
 }
 
 @Composable
-fun EventsView(events: List<CalendarEvent>, modifier: GlanceModifier = GlanceModifier) {
+fun EventsView(events: List<CalendarEvent> = listOf(), selectedDay: Int, selectedWeekDayName: String, modifier: GlanceModifier = GlanceModifier) {
     Column (
         modifier = modifier
-            .padding(8.dp, end = 16.dp)
+            .padding(16.dp)
             .fillMaxHeight(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // TODO - Add current day. ej: 16 Diciembre
-        for (event in events)
-            EventView(Color(150,218,181	), title = event.title, timeRange = event.timeRange)
+        if (events.isEmpty()) {
+            Text(
+                selectedWeekDayName.uppercase(),
+                style = TextStyle(
+                    fontWeight = FontWeight.Bold,
+                    color = colors.primary,
+                )
+            )
+            Row(
+                modifier = GlanceModifier.defaultWeight(),
+                horizontalAlignment = Alignment.Horizontal.CenterHorizontally,
+                verticalAlignment = Alignment.Top)
+            {
+                Text(
+                    "${selectedDay}",
+                    modifier = modifier,
+                    style = TextStyle(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 50.sp, // TODO - Choose design, this or the one bellow.
+                        color = colors.onSurface,
+//                        fontSize = 40.sp,
+//                        color = colors.primary,
+                    )
+                )
+            }
+            Text("No hay más eventos hoy",
+                modifier = GlanceModifier.defaultWeight()
+            )
+        }
+        else {
+            Text(
+                "${selectedWeekDayName.uppercase()} ${selectedDay}",
+                style = TextStyle(
+                    fontWeight = FontWeight.Bold,
+                    color = colors.primary,
+                ),
+                modifier = GlanceModifier.padding(bottom = 2.dp)
+            )
+
+            // EVENTSS!!!!
+            Column(modifier = GlanceModifier.defaultWeight()) {
+                for (event in events)
+                    EventView(Color(150, 218, 181), title = event.title, timeRange = event.timeRange)
+            }
+        }
     }
 }
 
@@ -91,7 +131,7 @@ fun EventView(color: Color, title: String, timeRange: TimeRange) {
     Row (
         modifier = GlanceModifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     )
     {
@@ -143,9 +183,32 @@ fun EventIndicator(color: Color, modifier: GlanceModifier = GlanceModifier) {
 @Preview
 @Composable
 fun EventViewPreview() {
-    EventsView(
-        events = examplesCalendarEvents
-    )
+    Row(modifier = GlanceModifier.width(200.dp).height(200.dp)) {
+        EventsView(
+            events = examplesCalendarEvents, 17, "JUEVES"
+        )
+    }
+}
+
+@OptIn(ExperimentalGlancePreviewApi::class)
+@Preview
+@Composable
+fun EventViewEmptyPreview() {
+    Row(modifier = GlanceModifier.width(200.dp).height(200.dp)) {
+        EventsView(
+            listOf(), 19, "JUEVES"
+        )
+    }
+}
+
+@OptIn(ExperimentalGlancePreviewApi::class)
+@Preview
+@Composable
+fun EventMonthPreview() {
+    val(a, b, c) = getCurrentMonthValues()
+    Row(modifier = GlanceModifier.width(400.dp)) {
+        MonthAndEventsView(a, b, c, examplesCalendarEvents,"JUEVES")
+    }
 }
 
 val examplesCalendarEvents = listOf(
@@ -157,5 +220,9 @@ val examplesCalendarEvents = listOf(
         TimeRange(LocalTime.now().plusHours(1), LocalTime.now().plusHours(2))),
 )
 
-data class CalendarEvent(val title: String, val timeRange: TimeRange, val date: LocalDate = LocalDate.now())
+data class CalendarEvent(
+    val title: String,
+    val timeRange: TimeRange,
+    val date: LocalDate = LocalDate.now()
+)
 

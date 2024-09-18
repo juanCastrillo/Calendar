@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:description="@string/app_widget_description"
-    android:initialKeyguardLayout="@layout/month_view"
-    android:initialLayout="@layout/month_view"
+    android:initialLayout="@layout/month_view_v2"
     android:previewImage="@drawable/preview_calendar"
 
 
