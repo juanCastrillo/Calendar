@@ -24,7 +24,11 @@ import androidx.glance.layout.Row
 
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
+import androidx.glance.layout.height
 import androidx.glance.layout.padding
+import androidx.glance.layout.width
+import androidx.glance.preview.ExperimentalGlancePreviewApi
+import androidx.glance.preview.Preview
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
@@ -64,7 +68,10 @@ fun MonthView(selectedDay: Int, monthName: String, calendarMatrix:Array<IntArray
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
-            modifier = GlanceModifier.defaultWeight(),
+            modifier = GlanceModifier.defaultWeight()
+                .fillMaxWidth()
+                .padding(start = 6.dp),
+//                .background(colors.primary),
             horizontalAlignment = Alignment.Start
         ) {
             MonthText(
@@ -154,10 +161,13 @@ fun DayChar(day: String, selected: Boolean = false, bold: Boolean = false, modif
     }
 }
 
-//@OptIn(ExperimentalGlancePreviewApi::class)
-//@Preview
-//@Composable
-//fun CalendarPreviewExample() {
-//    MonthView(1, "MARZO", constructCalendarMatrix(1, 31))
-//}
+@OptIn(ExperimentalGlancePreviewApi::class)
+@Preview
+@Composable
+fun CalendarPreviewExample() {
+    val (a,b,c) = getCurrentMonthValues()
+    Row(modifier = GlanceModifier.width(200.dp).height(200.dp)) {
+        MonthView(a, b, c)
+    }
+}
 

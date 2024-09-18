@@ -32,18 +32,24 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import java.time.LocalTime
 import androidx.compose.ui.text.intl.Locale
+import juan.calendar.CalendarEvent
+import juan.calendar.getTodayRemainingEvents
 
 class MonthAndEventsWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = MonthAndEventsWidget()
 }
 
+// TODO - Maybe fetch events when click on the widget.
 class MonthAndEventsWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
 
         val (currentDay, currentMonthName, calendarMatrix) = getCurrentMonthValues()
         val weekDayName = LocalDate.now().dayOfWeek.getDisplayName(java.time.format.TextStyle.FULL, Locale.current.platformLocale)
+
+        val events = getTodayRemainingEvents(context)
+
         provideContent {
-            MonthAndEventsView(currentDay, currentMonthName, calendarMatrix, listOf(), weekDayName)
+            MonthAndEventsView(currentDay, currentMonthName, calendarMatrix, events, weekDayName)
         }
     }
 }
@@ -74,7 +80,8 @@ fun MonthAndEventsView(selectedDay: Int, monthName: String, calendarMatrix:Array
 fun EventsView(events: List<CalendarEvent> = listOf(), selectedDay: Int, selectedWeekDayName: String, modifier: GlanceModifier = GlanceModifier) {
     Column (
         modifier = modifier
-            .padding(16.dp)
+            .padding(vertical = 16.dp)
+            .padding(end = 16.dp)
             .fillMaxHeight(),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -84,7 +91,8 @@ fun EventsView(events: List<CalendarEvent> = listOf(), selectedDay: Int, selecte
                 style = TextStyle(
                     fontWeight = FontWeight.Bold,
                     color = colors.primary,
-                )
+                ),
+//                modifier = GlanceModifier.padding( start = 24.dp)
             )
             Row(
                 modifier = GlanceModifier.defaultWeight(),
@@ -104,7 +112,8 @@ fun EventsView(events: List<CalendarEvent> = listOf(), selectedDay: Int, selecte
                 )
             }
             Text("No hay más eventos hoy",
-                modifier = GlanceModifier.defaultWeight()
+                modifier = GlanceModifier.defaultWeight(),
+                style = TextStyle(color = colors.onSurface,)
             )
         }
         else {
@@ -114,13 +123,17 @@ fun EventsView(events: List<CalendarEvent> = listOf(), selectedDay: Int, selecte
                     fontWeight = FontWeight.Bold,
                     color = colors.primary,
                 ),
-                modifier = GlanceModifier.padding(bottom = 2.dp)
+                modifier = GlanceModifier.padding(bottom = 2.dp, start = 24.dp)
             )
 
             // EVENTSS!!!!
             Column(modifier = GlanceModifier.defaultWeight()) {
                 for (event in events)
-                    EventView(Color(150, 218, 181), title = event.title, timeRange = event.timeRange)
+                    EventView(
+                        Color(150, 218, 181), // Get the color dynamically somehow
+                        title = event.title,
+                        timeRange = event.timeRange
+                    )
             }
         }
     }
@@ -220,9 +233,5 @@ val examplesCalendarEvents = listOf(
         TimeRange(LocalTime.now().plusHours(1), LocalTime.now().plusHours(2))),
 )
 
-data class CalendarEvent(
-    val title: String,
-    val timeRange: TimeRange,
-    val date: LocalDate = LocalDate.now()
-)
+
 
