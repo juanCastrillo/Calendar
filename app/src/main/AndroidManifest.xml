@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" >
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.READ_CALENDAR" />
     <uses-permission android:name="android.permission.WRITE_CALENDAR" />
@@ -15,12 +15,21 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Calendar"
         tools:targetApi="35">
+        <activity
+            android:name=".CalendarActivity"
+            android:exported="true"
+            android:label="@string/title_activity_calendar"
+            android:theme="@style/Theme.Calendar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
-
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <!-- MONTH WIDGET -->
         <receiver
             android:name=".widgets.MonthWidgetReceiver"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -28,12 +37,10 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/month_widget_info" />
-        </receiver>
-
-        <!-- MONTH+EVENTS WIDGET -->
+        </receiver> <!-- MONTH+EVENTS WIDGET -->
         <receiver
             android:name=".widgets.MonthAndEventsWidgetReceiver"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -41,29 +48,30 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/month_events_widget_info" />
-        </receiver>
-
-
-        <!-- DAY CHANGED RECEIVER -->
+        </receiver> <!-- DAY CHANGED RECEIVER -->
         <receiver
             android:name=".DayChangedBroadcastReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.DATE_CHANGED" />
             </intent-filter>
-        </receiver>
-
+        </receiver> <!-- CALENDAR EVENTS CHANGED -->
+        <!-- <receiver android:name=".CalendarBroadcastReceiver" -->
+        <!-- android:exported="false"> -->
+        <!-- <intent-filter> -->
+        <!-- <action android:name="android.intent.action.PROVIDER_CHANGED" /> -->
+        <!-- </intent-filter> -->
+        <!-- </receiver> -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.Calendar" >
+            android:theme="@style/Theme.Calendar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
     </application>
 
 </manifest>

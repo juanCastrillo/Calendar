@@ -21,7 +21,8 @@ fun getCalendarEvents(context: Context, startTime: LocalDateTime, endTime: Local
     val startMillis = startTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
     val endMillis = endTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
 
-    val selection = "${CalendarContract.Events.DTSTART} >= ? AND ${CalendarContract.Events.DTEND} <= ?"
+//    val selection = "${CalendarContract.Events.DTSTART} >= ? AND ${CalendarContract.Events.DTEND} <= ?"
+    val selection = "${CalendarContract.Events.DTEND} >= ? AND ${CalendarContract.Events.DTEND} <= ?"
     val selectionArgs = arrayOf(startMillis.toString(), endMillis.toString())
     val cursor = context.contentResolver.query(
         CalendarContract.Events.CONTENT_URI,
@@ -68,9 +69,9 @@ fun getTodayRemainingEvents(context:Context): List<CalendarEvent> {
     val endToday = nowToday.withHour(23).withMinute(59).withSecond(59)
     val events = getCalendarEvents(context, nowToday, endToday)
 
-    Log.d("EVENTS", "Lets see whts up")
+    Log.d("EVENTS_CalendarManagement", "Fetching Events ...")
     for (event in events) {
-        Log.d("EVENT", event.title)
+        Log.d("EVENT_CalendarManagement", event.title)
     }
 
     return events

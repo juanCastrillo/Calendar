@@ -14,7 +14,7 @@ data class TimeRange(val startTime: LocalTime, val endTime: LocalTime) {
 }
 
 /**
- * currentDay: Int, currentMonth: String, calendarMatrix:Array<IntArray>
+ * @return currentDay: Int, currentMonth: String, calendarMatrix:Array<IntArray>
  */
 fun getCurrentMonthValues(): Triple<Int, String, Array<IntArray>> {
     val today = LocalDate.now()

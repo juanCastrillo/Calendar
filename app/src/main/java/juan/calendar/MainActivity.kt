@@ -24,25 +24,16 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting("Juan")
+                    Text("Hey Juan, keep calm, its going to work eventually. As all good things do")
                 }
             }
         }
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hi $name!",
-        modifier = modifier
-    )
-}
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    CalendarTheme {
-        Greeting("Android")
-    }
+
+object AppConstants {
+    const val LAST_UPDATED_WIDGETS_TIME_KEY = "last_updated_time"
+    // Other constants
 }

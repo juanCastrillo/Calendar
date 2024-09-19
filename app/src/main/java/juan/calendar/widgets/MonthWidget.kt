@@ -53,12 +53,12 @@ class MonthWidget : GlanceAppWidget() {
 @Composable
 fun MonthWidgetView(selectedDay: Int, monthName: String, calendarMatrix:Array<IntArray>, modifier: GlanceModifier = GlanceModifier) {
     GlanceTheme {
-        MonthView(selectedDay, monthName, calendarMatrix, GlanceModifier.fillMaxSize())
+        MonthWidgetContentView(selectedDay, monthName, calendarMatrix, GlanceModifier.fillMaxSize())
     }
 }
 
 @Composable
-fun MonthView(selectedDay: Int, monthName: String, calendarMatrix:Array<IntArray>, modifier: GlanceModifier = GlanceModifier) {
+fun MonthWidgetContentView(selectedDay: Int, monthName: String, calendarMatrix:Array<IntArray>, modifier: GlanceModifier = GlanceModifier) {
 
     Column(
         modifier = modifier
@@ -74,13 +74,13 @@ fun MonthView(selectedDay: Int, monthName: String, calendarMatrix:Array<IntArray
 //                .background(colors.primary),
             horizontalAlignment = Alignment.Start
         ) {
-            MonthText(
+            MonthWidgetText(
                 monthName = monthName.toUpperCase(Locale.current),
                 modifier = GlanceModifier.defaultWeight(),)
         }
-        WeekDaysRow(modifier = GlanceModifier.defaultWeight()) // L M X ...
+        WeekDaysRowWidget(modifier = GlanceModifier.defaultWeight()) // L M X ...
         for (week in calendarMatrix) {
-            WeekNumbersRow(
+            WeekNumbersRowWidget(
                 weekNumbers = week,
                 selectedDay = selectedDay,
                 modifier = GlanceModifier.defaultWeight())
@@ -89,7 +89,7 @@ fun MonthView(selectedDay: Int, monthName: String, calendarMatrix:Array<IntArray
 }
 
 @Composable
-fun MonthText(monthName: String, modifier: GlanceModifier = GlanceModifier) {
+fun MonthWidgetText(monthName: String, modifier: GlanceModifier = GlanceModifier) {
     Text(monthName.toUpperCase(Locale.current),
         modifier = modifier,
         style = TextStyle(
@@ -105,12 +105,12 @@ fun MonthText(monthName: String, modifier: GlanceModifier = GlanceModifier) {
  * selectedDay: Number of the day to select
  */
 @Composable
-fun WeekNumbersRow(weekNumbers:IntArray, selectedDay: Int, modifier: GlanceModifier = GlanceModifier) {
+fun WeekNumbersRowWidget(weekNumbers:IntArray, selectedDay: Int, modifier: GlanceModifier = GlanceModifier) {
     Row(
         modifier = modifier.fillMaxWidth()
     ) {
         for (nDay in weekNumbers) {
-            DayChar(
+            DayCharWidget(
                 day = if (nDay == 0) " " else nDay.toString(),
                 selected = nDay == selectedDay,
                 modifier = GlanceModifier.defaultWeight()
@@ -122,16 +122,16 @@ fun WeekNumbersRow(weekNumbers:IntArray, selectedDay: Int, modifier: GlanceModif
 // Muestra la fila con la cabecera de los dias,
 // TODO - de momento está solo en español
 @Composable
-fun WeekDaysRow(modifier: GlanceModifier = GlanceModifier) {
+fun WeekDaysRowWidget(modifier: GlanceModifier = GlanceModifier) {
     Row (modifier = modifier.fillMaxWidth()) {
         for (firstLetterDay in listOf("L", "M", "X", "J", "V", "S", "D")) {
-            DayChar(day = firstLetterDay, bold = true, modifier = GlanceModifier.defaultWeight())
+            DayCharWidget(day = firstLetterDay, bold = true, modifier = GlanceModifier.defaultWeight())
         }
     }
 }
 
 @Composable
-fun DayChar(day: String, selected: Boolean = false, bold: Boolean = false, modifier: GlanceModifier = GlanceModifier) {
+fun DayCharWidget(day: String, selected: Boolean = false, bold: Boolean = false, modifier: GlanceModifier = GlanceModifier) {
 
     Box(
         modifier = modifier,
@@ -164,10 +164,10 @@ fun DayChar(day: String, selected: Boolean = false, bold: Boolean = false, modif
 @OptIn(ExperimentalGlancePreviewApi::class)
 @Preview
 @Composable
-fun CalendarPreviewExample() {
+fun CalendarWidgetPreviewExample() {
     val (a,b,c) = getCurrentMonthValues()
     Row(modifier = GlanceModifier.width(200.dp).height(200.dp)) {
-        MonthView(a, b, c)
+        MonthWidgetContentView(a, b, c)
     }
 }
 
